@@ -1,39 +1,47 @@
 Parameters:
-  KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
-    Type: "AWS::EC2::KeyPair::KeyName"
-Resources:
-  Type: AWS::EC2::SecurityGroup
-  Properties:
-    GroupDescription: IACSecurity
-    GroupName: IACSecurity
-    SecurityGroupEgress:
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIp: 0.0.0.0/0
-    SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        CidrIp: 0.0.0.0/0
-    VpcId: vpc-0b904bc250bdaae06
+  myVPC:
+    Description: VPC used to deploy our resources below
+    Type: AWS::EC2::VPC::Id
 
-Type: AWS::EC2::Instance
-Properties:
-  AvailabilityZone: us-east-1
-  NetworkInterfaces:
-    - AssociatePublicIpAddress: "true"
-      DeviceIndex: "0"
-      GroupSet:
-        - Ref: "myVPCEC2SecurityGroup"
-      SubnetId:
-        Ref: "PublicSubnet"
-  SubnetId: subnet-093323e2e41f530fb
-  UserData:
-    Fn::Base64: !Sub |
-      #!/bin/bash
-      sudo yum update -y
-      sudo yum install -y httpd
-      sudo systemctl start httpd
-      sudo systemctl enable httpd
+  PublicSubnet:
+    Description: Subnet to be used for our Web Server
+    Type: AWS::EC2::Subnet::Id
+  AMItoUse:
+    Description: AMI to use for our base image
+    Type: String
+Resources:
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: IACSecurity
+      GroupName: IACSecurity
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref myVPC
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: us-east-1
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+            - Ref: "MySecurityGroup"
+          SubnetId:
+            Ref: "PublicSubnet"
+      ImageId: !Ref AMItoUse
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd
