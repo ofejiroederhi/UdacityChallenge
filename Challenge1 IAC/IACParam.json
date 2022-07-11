@@ -5,7 +5,7 @@
       },
       {
         "ParameterKey": "PublicSubnet",
-        "ParameterValue": "subnet-093323e2e41f530fb"
+        "ParameterValue": "subnet-0c53ba95b06d90085"
       },
       {
         "ParameterKey": "AMItoUse",
