@@ -1,0 +1,39 @@
+Parameters:
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: "AWS::EC2::KeyPair::KeyName"
+Resources:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: IACSecurity
+    GroupName: IACSecurity
+    SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+    SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+    VpcId: vpc-0b904bc250bdaae06
+
+Type: AWS::EC2::Instance
+Properties:
+  AvailabilityZone: us-east-1
+  NetworkInterfaces:
+    - AssociatePublicIpAddress: "true"
+      DeviceIndex: "0"
+      GroupSet:
+        - Ref: "myVPCEC2SecurityGroup"
+      SubnetId:
+        Ref: "PublicSubnet"
+  SubnetId: subnet-093323e2e41f530fb
+  UserData:
+    Fn::Base64: !Sub |
+      #!/bin/bash
+      sudo yum update -y
+      sudo yum install -y httpd
+      sudo systemctl start httpd
+      sudo systemctl enable httpd
